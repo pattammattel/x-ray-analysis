@@ -12,3 +12,5 @@
 *.ico
 *.webp
 /jiang
+.DS_Store
+.ipynb_checkpoints
