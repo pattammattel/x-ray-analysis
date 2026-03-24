@@ -1,3 +1,14 @@
 # pixi environments
 .pixi/*
 !.pixi/config.toml
+*.tiff
+*.tif
+*.png
+*.jpg
+*.jpeg
+*.bmp
+*.gif
+*.svg
+*.ico
+*.webp
+/jiang
