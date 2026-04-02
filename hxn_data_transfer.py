@@ -315,3 +315,106 @@ def copy_data_from_proposal(proposal_id):
     # --- Launch the interactive rsync copy ---
     open_gnome_terminal_su_copy(local_path, proposal_path)
 
+
+def create_symlink_in_proposal(proposal_id):
+    """
+    Create a symbolic link in the proposal directory pointing to the local user directory.
+
+    Directory structure:
+        /nsls2/data/hxn/proposals/<cycle>/pass-<proposal_id>/
+            └── <pi_lastname>-<cycle> → /nsls2/data/hxn/legacy/users/<cycle>/<pi_lastname>-<cycle>/
+
+    Parameters
+    ----------
+    proposal_id : str or int
+        NSLS-II proposal number (e.g., 312345)
+
+    Returns
+    -------
+    dict
+        Status dictionary with keys:
+        - 'success': bool - whether the operation was successful
+        - 'message': str - status or error message
+        - 'local_path': str or None - source path (symlink target)
+        - 'proposal_path': str or None - proposal directory path
+        - 'symlink_path': str or None - full path to the created symlink
+    """
+
+    # --- Get source and destination paths ---
+    paths = get_proposal_paths(proposal_id)
+    if not paths:
+        return {
+            'success': False,
+            'message': f"Could not determine paths for proposal {proposal_id}",
+            'local_path': None,
+            'proposal_path': None,
+            'symlink_path': None
+        }
+
+    local_path, proposal_path = paths
+
+    # --- Check if proposal directory exists ---
+    if not os.path.exists(proposal_path):
+        return {
+            'success': False,
+            'message': f"Proposal directory does not exist:\n{proposal_path}\n\nPlease ensure the proposal directory is created first.",
+            'local_path': local_path,
+            'proposal_path': proposal_path,
+            'symlink_path': None
+        }
+
+    # --- Get symlink name from local path basename ---
+    symlink_name = os.path.basename(local_path)
+    symlink_path = os.path.join(proposal_path, symlink_name)
+
+    # --- Check if symlink already exists ---
+    if os.path.exists(symlink_path):
+        if os.path.islink(symlink_path):
+            existing_target = os.readlink(symlink_path)
+            if existing_target == local_path:
+                return {
+                    'success': True,
+                    'message': f"Symlink already exists and points to the correct location.",
+                    'local_path': local_path,
+                    'proposal_path': proposal_path,
+                    'symlink_path': symlink_path
+                }
+            else:
+                return {
+                    'success': False,
+                    'message': f"Symlink already exists but points to a different location:\n{existing_target}\n\nExpected:\n{local_path}",
+                    'local_path': local_path,
+                    'proposal_path': proposal_path,
+                    'symlink_path': symlink_path
+                }
+        else:
+            return {
+                'success': False,
+                'message': f"A file or directory already exists at:\n{symlink_path}\n\nCannot create symlink.",
+                'local_path': local_path,
+                'proposal_path': proposal_path,
+                'symlink_path': symlink_path
+            }
+
+    # --- Create the symlink ---
+    try:
+        os.symlink(local_path, symlink_path)
+        print(f"✓ Symlink created successfully:")
+        print(f"  Link: {symlink_path}")
+        print(f"  Target: {local_path}")
+        return {
+            'success': True,
+            'message': f"Symlink created successfully",
+            'local_path': local_path,
+            'proposal_path': proposal_path,
+            'symlink_path': symlink_path
+        }
+    except OSError as e:
+        return {
+            'success': False,
+            'message': f"Failed to create symlink:\n{str(e)}",
+            'local_path': local_path,
+            'proposal_path': proposal_path,
+            'symlink_path': symlink_path
+        }
+
