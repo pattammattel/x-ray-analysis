@@ -295,6 +295,12 @@ def copy_data_from_proposal(proposal_id):
 
     local_path, proposal_path = paths
 
+    # --- Check if destination directory exists ---
+    if not os.path.exists(proposal_path):
+        print(f"ERROR: Destination directory does not exist: {proposal_path}")
+        print(f"Please ensure the proposal directory is created before attempting to copy data.")
+        return
+
     print(f" Preparing to copy data for proposal {proposal_id}:")
     print(f"   From: {local_path}")
     print(f"   To:   {proposal_path}\n")
