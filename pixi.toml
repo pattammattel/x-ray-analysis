@@ -26,7 +26,7 @@ pyqt6 = ">=6.8.1,<7"
 # --- TASKS ---
 
 [tasks]
-ipython = "ipython -i startup.py"
+hxn-analysis = "ipython -i hxn_data_transfer.py"
 
 # --- GLOBAL DEPENDENCIES (Common to both) ---
 
