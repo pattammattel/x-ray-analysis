@@ -238,7 +238,7 @@ def open_gnome_terminal_su_copy(src_dir: str, dst_dir: str):
     DUO push and password handled in terminal.
     """
 
-    rsync_cmd = f"rsync -avh --progress '{src_dir}' '{dst_dir}'"
+    rsync_cmd = f"rsync -avh --progress --stats '{src_dir}' '{dst_dir}'"
 
     shell_script = (
         "echo '---------------------------------------'; "
@@ -249,8 +249,13 @@ def open_gnome_terminal_su_copy(src_dir: str, dst_dir: str):
         "echo; "
         "echo 'Logging in as $uname (DUO push may be required)...'; "
         f"su - $uname -c \"{rsync_cmd}\"; "
+        "EXIT_CODE=$?; "
         "echo; "
-        "echo ' Copy finished (or cancelled).'; "
+        "if [ $EXIT_CODE -eq 0 ]; then "
+        "    echo '✓ SUCCESS: Data copy completed successfully!'; "
+        "else "
+        "    echo '✗ FAILED: Data copy did not complete (exit code: '$EXIT_CODE')'; "
+        "fi; "
         "echo 'Press Enter to close this window.'; "
         "read"
     )
