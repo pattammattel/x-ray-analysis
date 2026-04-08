@@ -194,20 +194,26 @@ def export_scan_details_batch(
     for sid in tqdm(sid_list, desc="Exporting scan details"):
         try:
             hdr = db[int(sid)]
-            details = get_scan_details(hdr)
+            # Get full metadata including baseline table
+            metadata_df = get_scan_metadata(hdr)
             
-            # Flatten nested dictionaries if present
-            row = {"scan_id": details.get("scan_id", sid)}
-            for key, value in details.items():
-                if key == "scan_id":
-                    continue
-                # Handle nested dicts by converting to string
+            # Convert DataFrame to dictionary (take first row if multiple)
+            if len(metadata_df) > 0:
+                row = metadata_df.iloc[0].to_dict()
+                # Ensure scan_id is present
+                if "scan_id" not in row:
+                    row["scan_id"] = sid
+            else:
+                row = {"scan_id": sid}
+            
+            # Handle nested dicts and lists by converting to strings
+            for key, value in list(row.items()):
                 if isinstance(value, dict):
                     row[key] = str(value)
                 elif isinstance(value, (list, tuple)):
                     row[key] = str(value)
-                else:
-                    row[key] = value
+                elif pd.isna(value):
+                    row[key] = None
             
             all_rows.append(row)
             all_fields.update(row.keys())
