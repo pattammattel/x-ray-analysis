@@ -26,8 +26,9 @@ pyqt6 = ">=6.8.1,<7"
 # --- TASKS ---
 
 [tasks]
-hxn-analysis = "ipython -i hxn_data_transfer.py"
-notebook = "jupyter notebook"
+hxn-analysis = "ipython -i startup_all.py"
+hxn-transfer = "ipython -i hxn_data_transfer.py"
+notebook = "jupyter lab"
 
 # --- GLOBAL DEPENDENCIES (Common to both) ---
 
